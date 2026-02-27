@@ -34,7 +34,11 @@ namespace JobTracker.Api.Controllers
                     SalaryMin = a.SalaryMin,
                     SalaryMax = a.SalaryMax,
                     Notes = a.Notes,
-                    DateApplied = a.DateApplied
+                    DateApplied = a.DateApplied,
+                    JobUrl = a.JobUrl,
+                    WorkType = a.WorkType,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt
                 })
 
                 .ToListAsync();
@@ -44,13 +48,32 @@ namespace JobTracker.Api.Controllers
 
         // POST: api/JobApplications/{id}
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<JobApplication>> GetById(Guid id)
+        public async Task<ActionResult<JobApplicationResponse>> GetById(Guid id)
         {
-            var app = await _context.JobApplications.FindAsync(id);
-            if (app == null)
+            var a = await _context.JobApplications.FindAsync(id);
+            if (a == null)
                 return NotFound();
-            return Ok(app);
+
+            var response = new JobApplicationResponse
+            {
+                Id = a.Id,
+                CompanyName = a.CompanyName,
+                RoleTitle = a.RoleTitle,
+                Location = a.Location,
+                Status = a.Status,
+                SalaryMin = a.SalaryMin,
+                SalaryMax = a.SalaryMax,
+                Notes = a.Notes,
+                DateApplied = a.DateApplied,
+                JobUrl = a.JobUrl,
+                WorkType = a.WorkType,
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
+            };
+
+            return Ok(response);
         }
+        
 
         // POST: api/JobApplications
         [HttpPost]
@@ -66,7 +89,11 @@ namespace JobTracker.Api.Controllers
                 SalaryMin = request.SalaryMin,
                 SalaryMax = request.SalaryMax,
                 Notes = request.Notes,
-                DateApplied = DateTime.UtcNow
+                DateApplied = DateTime.UtcNow,
+                JobUrl = request.JobUrl,
+                WorkType = request.WorkType,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null
             };
 
             _context.JobApplications.Add(entity);
@@ -82,6 +109,10 @@ namespace JobTracker.Api.Controllers
                 SalaryMin = entity.SalaryMin,
                 SalaryMax = entity.SalaryMax,
                 Notes = entity.Notes,
+                JobUrl = entity.JobUrl,
+                WorkType = entity.WorkType,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
                 DateApplied = entity.DateApplied
             };
 
@@ -103,6 +134,9 @@ namespace JobTracker.Api.Controllers
             entity.SalaryMin = request.SalaryMin;
             entity.SalaryMax = request.SalaryMax;
             entity.Notes = request.Notes;
+            entity.JobUrl = request.JobUrl;
+            entity.WorkType = request.WorkType;
+            entity.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
@@ -117,7 +151,11 @@ namespace JobTracker.Api.Controllers
                 SalaryMin = entity.SalaryMin,
                 SalaryMax = entity.SalaryMax,
                 Notes = entity.Notes,
-                DateApplied = entity.DateApplied
+                DateApplied = entity.DateApplied,
+                JobUrl = entity.JobUrl,
+                WorkType = entity.WorkType,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
             };
 
             return Ok(response);
@@ -137,13 +175,33 @@ namespace JobTracker.Api.Controllers
         }
 
         [HttpPatch("{id:guid}/status")]
-        public async Task<ActionResult<JobApplication>> UpdateStatus(Guid id, UpdateStatusRequest request)
+        public async Task<ActionResult<JobApplicationResponse>> UpdateStatus(Guid id, UpdateStatusRequest request)
         {
             var existing = await _context.JobApplications.FindAsync(id);
             if (existing == null)
                 return NotFound();
             existing.Status = request.Status;
+            existing.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            var response = new JobApplicationResponse
+            {
+                Id = existing.Id,
+                CompanyName = existing.CompanyName,
+                RoleTitle = existing.RoleTitle,
+                Location = existing.Location,
+                Status = existing.Status,
+                SalaryMin = existing.SalaryMin,
+                SalaryMax = existing.SalaryMax,
+                Notes = existing.Notes,
+                DateApplied = existing.DateApplied,
+                JobUrl = existing.JobUrl,       
+                WorkType = existing.WorkType,   
+                CreatedAt = existing.CreatedAt, 
+                UpdatedAt = existing.UpdatedAt
+
+            };
+
             return Ok(existing);
         }
     }

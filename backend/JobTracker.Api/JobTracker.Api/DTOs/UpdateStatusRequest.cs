@@ -5,5 +5,6 @@ namespace JobTracker.Api.DTOs
     public class UpdateStatusRequest
     {
         public ApplicationStatus Status { get; set; }
+      
     }
 }

@@ -13,5 +13,10 @@ namespace JobTracker.Api.DTOs
         public decimal? SalaryMin { get; set; }
         public decimal? SalaryMax { get; set; }
         public string? Notes { get; set; }
+        public string? JobUrl { get; set; }
+        public WorkType WorkType { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }
