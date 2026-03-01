@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, useMemo } from "react"; 
-import { getApplications, addApplication, updateApplication } from "../api/jobApplications";
+import { getApplications, updateApplication } from "../api/jobApplications";
 
 const STATUSES = ["Wishlist", "Applied", "Screening", "Interviewing", "Offer", "Rejected"];
 
@@ -8,28 +8,11 @@ const STATUSES = ["Wishlist", "Applied", "Screening", "Interviewing", "Offer", "
 export default function Applications() {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
     const [error, setError] = useState(null);
     
 
-    const handleCreate = async () => {
-        const newApp = {
-            companyName: "Frontend Test",
-            roleTitle: "JAVA Developer",
-            location: "Johannesburg",
-            status: "Applied",
-            salaryMin: 15000,
-            salaryMax: 25000,
-            notes: "Created from React",
-            workType: "Onsite"
-        };
-
-        try {
-            await addApplication(newApp);
-            await fetchApplications(); // refresh board
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    
 
     const handleStatusChange = async (id, newStatus) => {
         try {
@@ -58,11 +41,18 @@ export default function Applications() {
     }, []); 
 
     // 1️ Sort first
+    const filteredApplications = useMemo(() => {
+        return applications.filter(app =>
+            app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.roleTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [applications, searchTerm]);
+
     const sortedApplications = useMemo(() => {
-        return [...applications].sort(
+        return [...filteredApplications].sort(
             (a, b) => new Date(b.dateApplied) - new Date(a.dateApplied)
         );
-    }, [applications]);
+    }, [filteredApplications]);
 
     // 2️ Then group
     const groupedApplications = useMemo(() => {
@@ -78,22 +68,66 @@ export default function Applications() {
     if (error) return <p>Error: {error}</p>;
 
     return (
-        <div>
-            <h1>Job Applications</h1>
+        <div >
+            {/* HEADER SECTION */}
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20
+            }}
+        >
+            <div>
+                <h1 style={{ margin: 0 }}>Applications Board</h1>
+                <p style={{ margin: 0, color: "#666" }}>
+                    {applications.length} total applications
+                </p>
+            </div>
 
-            <button onClick={handleCreate}>
-                Test Add Application
+            <button
+                style={{
+                    backgroundColor: "black",
+                    color: "white",
+                    padding: "10px 16px",
+                    borderRadius: 8,
+                    border: "none",
+                    cursor: "pointer"
+                }}
+            >
+                + Add Application
             </button>
+            </div>
 
+            {/* SEARCH BAR */}
+            <div style={{ marginBottom: 20 }}>
+                <input
+                    type="text"
+                    placeholder="Search by company or position..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                        width: "50%",
+                        padding: "12px",
+                        borderRadius: 8,
+                        border: "1px solid #ccc"
+                    }}
+                />
+            </div>
+
+            {/*check if there are application(card) available*/ }
             {applications.length === 0 ? (
                 <p>No applications found.</p>
             ) : (
-                <div style={{ display: "flex", gap: "24px" }}>
-                    {Object.entries(groupedApplications).map(([status, apps]) => (
-                        <div key={status} style={{ flex: 1 }}>
+                    <div style={{ display: "flex", gap: "24px", alignItems: "flex-start", overflowX: "auto" }}>
+                        {/*columns*/ }
+                        {Object.entries(groupedApplications).map(([status, apps]) => (
+                            <div key={status} style={{ flex: "1", minWidth: "180px" }}>
                             <h2>
                                 {status} ({apps.length})
-                            </h2>
+                                </h2>
+
+                                {/*cards*/ }
 
                             {apps.map(app => (
                                 <div
