@@ -7,3 +7,27 @@ export async function getApplications() {
     }
     return await response.json();
 }
+
+export async function addApplication(application) {
+    const response = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(application),
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add job application");
+    }
+    return await response.json();
+}
+
+export async function updateApplication(id, status) {
+    const response = await fetch(`${API_BASE}/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+    });
+    if (!response.ok) {
+        throw new Error("Failed to update job application");
+    }
+    return await response.json();
+}
