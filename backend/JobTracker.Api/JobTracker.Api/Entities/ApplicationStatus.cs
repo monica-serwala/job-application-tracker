@@ -4,10 +4,11 @@
     {
         Wishlist = 0,
         Applied = 1,
-        Interviewing = 2,
-        Offer = 3,
-        Rejected = 4,
-        Withdrawn = 5
+        Screening = 2,
+        Interviewing = 3,
+        Offer = 4,
+        Rejected = 5,
+        Withdrawn = 6
 
     }
 }
