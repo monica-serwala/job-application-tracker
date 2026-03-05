@@ -3,7 +3,7 @@
 //Displays it in a full - screen overlay
 //Allows closing back to / applications
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import { useEffect, useState } from "react";
 import * as Api from "../api/jobApplications";
 import { Pencil, Check, X } from "lucide-react";
@@ -12,6 +12,7 @@ export default function ApplicationDetails() {
     console.log("DETAILS COMPONENT UPDATED");
     const { id } = useParams();
     const navigate = useNavigate();
+    const { refreshApplications } = useOutletContext();
     console.log("API exports:", Object.keys(Api));
 
 
@@ -21,6 +22,7 @@ export default function ApplicationDetails() {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+
 
     useEffect(() => {
         const fetchApplication = async () => {
@@ -71,6 +73,7 @@ export default function ApplicationDetails() {
 
             setApplication(updated);
             setIsEditing(false);
+            await refreshApplications();
         } catch (err) {
             console.error(err);
             alert("Failed to update");

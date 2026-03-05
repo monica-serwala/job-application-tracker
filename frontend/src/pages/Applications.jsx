@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState, useMemo } from "react"; 
 import { getApplications } from "../api/jobApplications";
-import { useNavigate, Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import KanbanBoard from "../components/kanban/KanbanBoard";
 
 const STATUSES = ["Wishlist", "Applied", "Screening", "Interviewing", "Offer", "Rejected"];
 
@@ -15,10 +16,10 @@ export default function Applications() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [error, setError] = useState(null);
+  
+    const navigate = useNavigate();
     
-    const navigate = useNavigate(); 
-    
-
+   
     
 
     const fetchApplications = async () => {
@@ -38,7 +39,7 @@ export default function Applications() {
         fetchApplications();
     }, []); 
 
-    // 1️ Sort first
+    // Filter applications
     const filteredApplications = useMemo(() => {
         return applications.filter(app =>
             app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,13 +47,14 @@ export default function Applications() {
         );
     }, [applications, searchTerm]);
 
+    // Sort applications by most recent
     const sortedApplications = useMemo(() => {
         return [...filteredApplications].sort(
             (a, b) => new Date(b.dateApplied) - new Date(a.dateApplied)
         );
     }, [filteredApplications]);
 
-    // 2️ Then group
+    // Group applications by status
     const groupedApplications = useMemo(() => {
         return STATUSES.reduce((acc, status) => {
             acc[status] = sortedApplications.filter(
@@ -83,6 +85,7 @@ export default function Applications() {
                 </div>
 
                 <button
+                    onClick={() => navigate("/applications/new")}
                     style={{
                         backgroundColor: "black",
                         color: "white",
@@ -115,54 +118,17 @@ export default function Applications() {
                 {/*check if there are application(card) available*/ }
                 {applications.length === 0 ? (
                     <p>No applications found.</p>
-                ) : (
-                        <div style={{ display: "flex", gap: "24px", alignItems: "flex-start", overflowX: "auto" }}>
-                            {/*columns*/ }
-                            {Object.entries(groupedApplications).map(([status, apps]) => (
-                                <div key={status} style={{ flex: "1", minWidth: "180px" }}>
-                                <h2>
-                                    {status} ({apps.length})
-                                    </h2>
-
-                                    {/*cards*/ }
-
-                                {apps.map(app => (
-                                    <div
-                                        key={app.id}
-                                        onClick={() => navigate(`/applications/${app.id}`)}
-                                        style={{
-                                            marginBottom: 12,
-                                            padding: 12,
-                                            border: "1px solid #ddd",
-                                            borderRadius: 8,
-                                            background: "#fff"
-                                        }}
-                                    >
-                                        <h3 style={{ margin: "0 0 6px" }}>
-                                            {app.roleTitle}
-                                        </h3>
-
-                                        <p style={{ margin: "0 0 4px" }}>
-                                            {app.companyName}
-                                        </p>
-
-                                        <p style={{ margin: "0 0 4px" }}>
-                                            {app.location}
-                                        </p>
-
-                                        <p style={{ margin: 0 }}>
-                                            {new Date(app.dateApplied).toLocaleDateString()}
-                                        </p>
-
-                                    
-
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                 )}
-            <Outlet />
+                     ) : (
+                        
+                        <KanbanBoard
+                            groupedApplications={groupedApplications}
+                            setApplications={setApplications}
+                        />
+                     )}           
+                    
+   
+                 
+            <Outlet context={{ refreshApplications: fetchApplications }} />
         </div>
     );
 }
