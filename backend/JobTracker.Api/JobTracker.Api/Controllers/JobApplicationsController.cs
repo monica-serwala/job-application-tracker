@@ -12,9 +12,36 @@ namespace JobTracker.Api.Controllers
     public class JobApplicationsController : ControllerBase
     {
         private readonly JobTrackerDbContext _context;
+
         public JobApplicationsController(JobTrackerDbContext context)
         {
             _context = context;
+        }
+
+        private static JobApplicationResponse ToResponse(JobApplication a)
+        {
+            return new JobApplicationResponse
+            {
+                Id = a.Id,
+                CompanyName = a.CompanyName,
+                RoleTitle = a.RoleTitle,
+                Location = a.Location,
+                Status = a.Status,
+                DateApplied = a.DateApplied,
+                SalaryMin = a.SalaryMin,
+                SalaryMax = a.SalaryMax,
+                Notes = a.Notes,
+                JobUrl = a.JobUrl,
+                WorkType = a.WorkType,
+
+                RecruiterName = a.RecruiterName,
+                RecruiterEmail = a.RecruiterEmail,
+                RecruiterPhone = a.RecruiterPhone,
+                FollowUpDate = a.FollowUpDate,
+
+                CreatedAt = a.CreatedAt,
+                UpdatedAt = a.UpdatedAt
+            };
         }
 
         // GET: api/JobApplications
@@ -23,57 +50,22 @@ namespace JobTracker.Api.Controllers
         {
             var apps = await _context.JobApplications
                 .OrderByDescending(a => a.DateApplied)
-                
-                .Select(a => new JobApplicationResponse
-                {
-                    Id = a.Id,
-                    CompanyName = a.CompanyName,
-                    RoleTitle = a.RoleTitle,
-                    Location = a.Location,
-                    Status = a.Status,
-                    SalaryMin = a.SalaryMin,
-                    SalaryMax = a.SalaryMax,
-                    Notes = a.Notes,
-                    DateApplied = a.DateApplied,
-                    JobUrl = a.JobUrl,
-                    WorkType = a.WorkType,
-                    CreatedAt = a.CreatedAt,
-                    UpdatedAt = a.UpdatedAt
-                })
-
                 .ToListAsync();
 
-            return Ok(apps);
+            return Ok(apps.Select(ToResponse));
         }
 
-        // POST: api/JobApplications/{id}
+        // GET: api/JobApplications/{id}
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<JobApplicationResponse>> GetById(Guid id)
         {
             var a = await _context.JobApplications.FindAsync(id);
+
             if (a == null)
                 return NotFound();
 
-            var response = new JobApplicationResponse
-            {
-                Id = a.Id,
-                CompanyName = a.CompanyName,
-                RoleTitle = a.RoleTitle,
-                Location = a.Location,
-                Status = a.Status,
-                SalaryMin = a.SalaryMin,
-                SalaryMax = a.SalaryMax,
-                Notes = a.Notes,
-                DateApplied = a.DateApplied,
-                JobUrl = a.JobUrl,
-                WorkType = a.WorkType,
-                CreatedAt = a.CreatedAt,
-                UpdatedAt = a.UpdatedAt
-            };
-
-            return Ok(response);
+            return Ok(ToResponse(a));
         }
-        
 
         // POST: api/JobApplications
         [HttpPost]
@@ -89,34 +81,22 @@ namespace JobTracker.Api.Controllers
                 SalaryMin = request.SalaryMin,
                 SalaryMax = request.SalaryMax,
                 Notes = request.Notes,
-                DateApplied = DateTime.UtcNow,
                 JobUrl = request.JobUrl,
                 WorkType = request.WorkType,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null
+
+                RecruiterName = request.RecruiterName,
+                RecruiterEmail = request.RecruiterEmail,
+                RecruiterPhone = request.RecruiterPhone,
+                FollowUpDate = request.FollowUpDate,
+
+                DateApplied = request.DateApplied,
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.JobApplications.Add(entity);
             await _context.SaveChangesAsync();
 
-            var response = new JobApplicationResponse
-            {
-                Id = entity.Id,
-                CompanyName = entity.CompanyName,
-                RoleTitle = entity.RoleTitle,
-                Location = entity.Location,
-                Status = entity.Status,
-                SalaryMin = entity.SalaryMin,
-                SalaryMax = entity.SalaryMax,
-                Notes = entity.Notes,
-                JobUrl = entity.JobUrl,
-                WorkType = entity.WorkType,
-                CreatedAt = entity.CreatedAt,
-                UpdatedAt = entity.UpdatedAt,
-                DateApplied = entity.DateApplied
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = entity.Id }, response);
+            return CreatedAtAction(nameof(GetById), new { id = entity.Id }, ToResponse(entity));
         }
 
         // PUT: api/JobApplications/{id}
@@ -124,6 +104,7 @@ namespace JobTracker.Api.Controllers
         public async Task<ActionResult<JobApplicationResponse>> Update(Guid id, UpdateJobApplicationRequest request)
         {
             var entity = await _context.JobApplications.FindAsync(id);
+
             if (entity == null)
                 return NotFound();
 
@@ -136,29 +117,18 @@ namespace JobTracker.Api.Controllers
             entity.Notes = request.Notes;
             entity.JobUrl = request.JobUrl;
             entity.WorkType = request.WorkType;
+
+            entity.RecruiterName = request.RecruiterName;
+            entity.RecruiterEmail = request.RecruiterEmail;
+            entity.RecruiterPhone = request.RecruiterPhone;
+            entity.FollowUpDate = request.FollowUpDate;
+
+            entity.DateApplied = request.DateApplied;
             entity.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
-
-            var response = new JobApplicationResponse
-            {
-                Id = entity.Id,
-                CompanyName = entity.CompanyName,
-                RoleTitle = entity.RoleTitle,
-                Location = entity.Location,
-                Status = entity.Status,
-                SalaryMin = entity.SalaryMin,
-                SalaryMax = entity.SalaryMax,
-                Notes = entity.Notes,
-                DateApplied = entity.DateApplied,
-                JobUrl = entity.JobUrl,
-                WorkType = entity.WorkType,
-                CreatedAt = entity.CreatedAt,
-                UpdatedAt = entity.UpdatedAt
-            };
-
-            return Ok(response);
+            return Ok(ToResponse(entity));
         }
 
         // DELETE: api/JobApplications/{id}
@@ -166,43 +136,31 @@ namespace JobTracker.Api.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var existing = await _context.JobApplications.FindAsync(id);
+
             if (existing == null)
                 return NotFound();
+
             _context.JobApplications.Remove(existing);
             await _context.SaveChangesAsync();
-            return NoContent();
 
+            return NoContent();
         }
 
+        // PATCH: api/JobApplications/{id}/status
         [HttpPatch("{id:guid}/status")]
         public async Task<ActionResult<JobApplicationResponse>> UpdateStatus(Guid id, UpdateStatusRequest request)
         {
             var existing = await _context.JobApplications.FindAsync(id);
+
             if (existing == null)
                 return NotFound();
+
             existing.Status = request.Status;
             existing.UpdatedAt = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
-            var response = new JobApplicationResponse
-            {
-                Id = existing.Id,
-                CompanyName = existing.CompanyName,
-                RoleTitle = existing.RoleTitle,
-                Location = existing.Location,
-                Status = existing.Status,
-                SalaryMin = existing.SalaryMin,
-                SalaryMax = existing.SalaryMax,
-                Notes = existing.Notes,
-                DateApplied = existing.DateApplied,
-                JobUrl = existing.JobUrl,       
-                WorkType = existing.WorkType,   
-                CreatedAt = existing.CreatedAt, 
-                UpdatedAt = existing.UpdatedAt
-
-            };
-
-            return Ok(existing);
+            return Ok(ToResponse(existing));
         }
     }
 }
