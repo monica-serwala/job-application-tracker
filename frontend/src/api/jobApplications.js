@@ -65,3 +65,13 @@ export async function updateApplication(id, data) {
 
     return await response.json();
 }
+
+export async function getDashboard() {
+    const response = await fetch("https://localhost:7062/api/dashboard");
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch dashboard data");
+    }
+
+    return await response.json();
+}

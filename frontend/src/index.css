@@ -66,3 +66,48 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.dashboard-container {
+    padding: 30px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+    .stat-card h4 {
+        font-size: 14px;
+        color: #777;
+    }
+
+    .stat-card p {
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.widget {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+    .widget h3 {
+        margin-bottom: 15px;
+    }

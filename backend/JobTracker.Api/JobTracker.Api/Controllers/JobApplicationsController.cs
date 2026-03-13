@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using JobTracker.Api.Data;
 using JobTracker.Api.Entities;
-using Microsoft.EntityFrameworkCore;
 using JobTracker.Api.DTOs;
 
 namespace JobTracker.Api.Controllers
@@ -18,6 +17,9 @@ namespace JobTracker.Api.Controllers
             _context = context;
         }
 
+        // ======================
+        // ENTITY → RESPONSE DTO
+        // ======================
         private static JobApplicationResponse ToResponse(JobApplication a)
         {
             return new JobApplicationResponse
@@ -44,7 +46,9 @@ namespace JobTracker.Api.Controllers
             };
         }
 
-        // GET: api/JobApplications
+        // ======================
+        // GET ALL APPLICATIONS
+        // ======================
         [HttpGet]
         public async Task<ActionResult<IEnumerable<JobApplicationResponse>>> GetAll()
         {
@@ -52,28 +56,31 @@ namespace JobTracker.Api.Controllers
                 .OrderByDescending(a => a.DateApplied)
                 .ToListAsync();
 
-            return Ok(apps.Select(ToResponse));
+            return Ok(apps.Select(ToResponse).ToList());
         }
 
-        // GET: api/JobApplications/{id}
+        // ======================
+        // GET APPLICATION BY ID
+        // ======================
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<JobApplicationResponse>> GetById(Guid id)
         {
-            var a = await _context.JobApplications.FindAsync(id);
+            var app = await _context.JobApplications.FindAsync(id);
 
-            if (a == null)
+            if (app == null)
                 return NotFound();
 
-            return Ok(ToResponse(a));
+            return Ok(ToResponse(app));
         }
 
-        // POST: api/JobApplications
+        // ======================
+        // CREATE APPLICATION
+        // ======================
         [HttpPost]
         public async Task<ActionResult<JobApplicationResponse>> Create(CreateJobApplicationRequest request)
         {
             var entity = new JobApplication
             {
-                Id = Guid.NewGuid(),
                 CompanyName = request.CompanyName,
                 RoleTitle = request.RoleTitle,
                 Location = request.Location,
@@ -96,10 +103,12 @@ namespace JobTracker.Api.Controllers
             _context.JobApplications.Add(entity);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = entity.Id }, ToResponse(entity));
+            return Ok(ToResponse(entity));
         }
 
-        // PUT: api/JobApplications/{id}
+        // ======================
+        // UPDATE APPLICATION
+        // ======================
         [HttpPut("{id:guid}")]
         public async Task<ActionResult<JobApplicationResponse>> Update(Guid id, UpdateJobApplicationRequest request)
         {
@@ -131,7 +140,9 @@ namespace JobTracker.Api.Controllers
             return Ok(ToResponse(entity));
         }
 
-        // DELETE: api/JobApplications/{id}
+        // ======================
+        // DELETE APPLICATION
+        // ======================
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -146,7 +157,9 @@ namespace JobTracker.Api.Controllers
             return NoContent();
         }
 
-        // PATCH: api/JobApplications/{id}/status
+        // ======================
+        // UPDATE STATUS ONLY
+        // ======================
         [HttpPatch("{id:guid}/status")]
         public async Task<ActionResult<JobApplicationResponse>> UpdateStatus(Guid id, UpdateStatusRequest request)
         {
@@ -161,6 +174,22 @@ namespace JobTracker.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(ToResponse(existing));
+        }
+
+        // ======================
+        // FOLLOW UPS
+        // ======================
+        [HttpGet("followups")]
+        public async Task<ActionResult<IEnumerable<JobApplicationResponse>>> GetFollowUps()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            var followUps = await _context.JobApplications
+                .Where(j => j.FollowUpDate != null && j.FollowUpDate <= today)
+                .OrderBy(j => j.FollowUpDate)
+                .ToListAsync();
+
+            return Ok(followUps.Select(ToResponse).ToList());
         }
     }
 }

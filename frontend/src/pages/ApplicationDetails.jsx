@@ -45,6 +45,7 @@ export default function ApplicationDetails() {
 
         try {
             await Api.deleteApplication(id);
+            await refreshApplications();
             navigate("/applications");
         } catch (err) {
             console.error(err);
@@ -205,7 +206,7 @@ export default function ApplicationDetails() {
                             >
                                 <option value="Remote">Remote</option>
                                 <option value="Hybrid">Hybrid</option>
-                                <option value="On-site">On-site</option>
+                                <option value="Onsite">Onsite</option>
                             </select>
                         ) : (
                             <span> {application.workType}</span>
