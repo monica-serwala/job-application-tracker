@@ -30,9 +30,14 @@ export default function Dashboard() {
         name: key,
         value: value
     }));
-    console.log("Dashboard stats:", stats);
-    console.log("Chart data:", chartData);
 
+    const weeklyGoal = 10;
+    const weeklyProgress = stats.applicationsThisWeek || 0;
+
+    const goalPercentage = Math.min(
+        (weeklyProgress / weeklyGoal) * 100,
+        100
+    );
 
     return (
         <div className="dashboard-container">
@@ -123,6 +128,23 @@ export default function Dashboard() {
                             </li>
                         ))}
                     </ul>
+
+                </div>
+
+                <div className="widget">
+
+                    <h3>Weekly Goal</h3>
+
+                    <p>
+                        {weeklyProgress} / {weeklyGoal} Applications
+                    </p>
+
+                    <div className="goal-bar">
+                        <div
+                            className="goal-progress"
+                            style={{ width: `${goalPercentage}%` }}
+                        />
+                    </div>
 
                 </div>
 
