@@ -73,7 +73,7 @@ export default function Dashboard() {
                 </div>
 
             </div>
-            
+
 
             {/* STATUS BREAKDOWN CHART */}
             <div className="widget">
@@ -119,15 +119,23 @@ export default function Dashboard() {
 
                 <div className="widget">
 
-                    <h3>Follow Ups</h3>
+                    <h3>Upcoming Follow Ups</h3>
 
-                    <ul>
-                        {stats.followUps.map((item, index) => (
-                            <li key={index}>
-                                {item.companyName} — {item.roleTitle}
-                            </li>
-                        ))}
-                    </ul>
+                    {stats.followUps.length === 0 ? (
+                        <p>No upcoming follow ups</p>
+                    ) : (
+                        <ul>
+                            {stats.followUps.map((item, index) => (
+                                <li key={index}>
+                                    <strong>{item.roleTitle}</strong> — {item.companyName}
+                                    <br />
+                                    <small>
+                                        {new Date(item.followUpDate).toLocaleDateString()}
+                                    </small>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
 
                 </div>
 

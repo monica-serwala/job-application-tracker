@@ -126,3 +126,17 @@ button:focus-visible {
     background: #6366f1;
     transition: width 0.3s ease;
 }
+
+.widget ul {
+    list-style: none;
+    padding: 0;
+}
+
+.widget li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.widget small {
+    color: #6b7280;
+}
