@@ -39,6 +39,15 @@ export default function Dashboard() {
         100
     );
 
+    const COLORS = [
+        "#6366F1",
+        "#22C55E",
+        "#F59E0B",
+        "#EF4444",
+        "#8B5CF6",
+        "#06B6D4"
+    ];
+
     return (
         <div className="dashboard-container">
 
@@ -90,7 +99,10 @@ export default function Dashboard() {
                         label
                     >
                         {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} />
+                            <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                            />
                         ))}
                     </Pie>
 
